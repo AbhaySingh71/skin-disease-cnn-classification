@@ -1,108 +1,73 @@
 import streamlit as st
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+import torchvision.models as models
 import numpy as np
 from PIL import Image
-import keras.utils as image
-from keras.models import model_from_json
 
-# -------------------------------
-# App Config
-# -------------------------------
-st.set_page_config(
-    page_title="Skin Disease Detection",
-    page_icon="🩺",
-    layout="centered"
-)
+# ---------------- CONFIG ----------------
+st.set_page_config(page_title="Skin Disease Diagnosis", layout="centered")
 
-st.title("🧬 Skin Disease Detection System")
-st.write("Upload a skin image to detect the disease using a deep learning model.")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# -------------------------------
-# Classes
-# -------------------------------
-SKIN_CLASSES = {
-    0: 'Actinic Keratoses (Solar Keratoses) or Bowen’s disease',
-    1: 'Basal Cell Carcinoma',
-    2: 'Benign Keratosis',
-    3: 'Dermatofibroma',
-    4: 'Melanoma',
-    5: 'Melanocytic Nevi',
-    6: 'Vascular skin lesion'
-}
+CLASS_NAMES = [
+    "BA-cellulitis",
+    "BA-impetigo",
+    "FU-athlete-foot",
+    "FU-nail-fungus",
+    "FU-ringworm",
+    "PA-cutaneous-larva-migrans",
+    "VI-chickenpox",
+    "VI-shingles"
+]
 
-# -------------------------------
-# Medicine Recommendation
-# -------------------------------
-def find_medicine(pred):
-    if pred == 0:
-        return "Fluorouracil (5-FU)"
-    elif pred == 1:
-        return "Aldara (Imiquimod)"
-    elif pred == 2:
-        return "No medicine required"
-    elif pred == 3:
-        return "Fluorouracil"
-    elif pred == 4:
-        return "Fluorouracil (5-FU)"
-    elif pred == 5:
-        return "Fluorouracil"
-    elif pred == 6:
-        return "Consult Dermatologist"
-
-# -------------------------------
-# Load Model (Cached)
-# -------------------------------
+# ---------------- LOAD MODEL ----------------
 @st.cache_resource
 def load_model():
-    with open("model.json", "r") as f:
-        model_json = f.read()
-    model = model_from_json(model_json)
-    model.load_weights("model.h5")
-    return model
+    model = models.resnet18(weights=None)
+    model.fc = nn.Linear(model.fc.in_features, len(CLASS_NAMES))
+    model.load_state_dict(
+        torch.load("fine_tuned_skin_disease_model_unfrozen.pth", map_location=device)
+    )
+    model.eval()
+    return model.to(device)
 
 model = load_model()
 
-# -------------------------------
-# Image Upload
-# -------------------------------
+# ---------------- TRANSFORMS ----------------
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])
+
+# ---------------- UI ----------------
+st.title("🧠 AI Skin Disease Diagnosis")
+st.markdown("⚠️ *For educational purposes only. Not a medical diagnosis.*")
+
 uploaded_file = st.file_uploader(
-    "Upload Skin Image",
-    type=["jpg", "jpeg", "png"]
+    "Upload a skin image", type=["jpg", "png", "jpeg"]
 )
 
 if uploaded_file:
-    img_pil = Image.open(uploaded_file).convert("RGB")
-    st.image(img_pil, caption="Uploaded Image", use_column_width=True)
+    image = Image.open(uploaded_file).convert("RGB")
+    st.image(image, caption="Uploaded Image", width=400)
 
-    # Preprocessing
-    img = img_pil.resize((224, 224))
-    img = np.array(img)
-    img = img.reshape((1, 224, 224, 3))
-    img = img / 255.0
+    input_tensor = transform(image).unsqueeze(0).to(device)
 
-    # Prediction Button
-    if st.button("🔍 Detect Disease"):
-        with st.spinner("Analyzing image..."):
-            prediction = model.predict(img)
-            pred = np.argmax(prediction)
-            confidence = round(prediction[0][pred] * 100, 2)
+    with torch.no_grad():
+        outputs = model(input_tensor)
+        probs = torch.softmax(outputs, dim=1)[0]
+        pred_idx = torch.argmax(probs).item()
+        confidence = probs[pred_idx].item()
 
-        disease = SKIN_CLASSES[pred]
-        medicine = find_medicine(pred)
+    # ---------------- RESULTS ----------------
+    st.success(f"### 🩺 Prediction: {CLASS_NAMES[pred_idx]}")
+    st.write(f"**Confidence Score:** {confidence * 100:.2f}%")
 
-        st.success("✅ Detection Completed")
-
-        st.subheader("🧾 Result")
-        st.write(f"**Disease:** {disease}")
-        st.write(f"**Confidence:** {confidence}%")
-        st.write(f"**Suggested Medicine:** {medicine}")
-
-        if pred == 2:
-            st.info("This condition is **benign** and usually does not require treatment.")
-        elif pred == 4:
-            st.warning("⚠️ Melanoma detected. Please consult a dermatologist immediately.")
-
-# -------------------------------
-# Footer
-# -------------------------------
-st.markdown("---")
-st.caption("⚕️ AI-based Skin Disease Detection | Built with Streamlit")
+    # Confidence bar (nice UI touch)
+    st.progress(confidence)
