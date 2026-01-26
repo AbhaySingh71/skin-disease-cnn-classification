@@ -24,6 +24,7 @@ Skin diseases often present visually similar symptoms, making accurate diagnosis
 ## 📸 Project Demo  
 
 | ![Screenshot 1](assets/Demo1.png) | ![Screenshot 2](assets/Demo2.png) |  
+|---------------------------------|---------------------------------|  
 
 ##  Dataset Source
 
