@@ -10,18 +10,27 @@ Skin diseases often present visually similar symptoms, making accurate diagnosis
 
 ### Key Highlights
 
-* ✅ Classification of **8 skin disease categories**
-* 🧠 Transfer Learning using **ResNet18**
-* ⚖️ Class imbalance handling with **weighted loss**
-* 📈 Accuracy improved from **67.09% → 88.03% → 95.73%**
-* 🔍 **Grad-CAM** for model interpretability
-* 🖥️ Deployed as an interactive **Streamlit web ap
+*  Classification of **8 skin disease categories**
+*  Transfer Learning using **ResNet18**
+*  Class imbalance handling with **weighted loss**
+*  Accuracy improved from **67.09% → 88.03% → 95.73%**
+*  **Grad-CAM** for model interpretability
+*  Deployed as an interactive **Streamlit web ap
 
 > ⚠️ **Disclaimer:** This system is intended for educational and research purposes only and should not replace professional medical diagnosis.
 
 ---
 
-## 📂 Dataset Description
+## 📸 Project Demo  
+
+| ![Screenshot 1](assets/Demo1.png) | ![Screenshot 2](assets/Demo2.png) |  
+
+##  Dataset Source
+
+This project uses the **Skin Disease Dataset** available on Kaggle:
+
+ https://www.kaggle.com/datasets/subirbiswas19/skin-disease-dataset
+
 
 ### Dataset Structure
 
@@ -46,7 +55,7 @@ Both training and testing sets consistently contain **8 skin disease classes**, 
 
 ---
 
-## 🏷️ Skin Disease Classes
+##  Skin Disease Classes
 
 1. **BA-cellulitis**
 2. **BA-impetigo**
@@ -67,7 +76,7 @@ Both training and testing sets consistently contain **8 skin disease classes**, 
 
 ---
 
-## 🧠 Model Architecture
+##  Model Architecture
 
 ### Baseline Model
 
@@ -84,7 +93,7 @@ Both training and testing sets consistently contain **8 skin disease classes**, 
 
 ---
 
-## ⚖️ Handling Class Imbalance
+##  Handling Class Imbalance
 
 To mitigate bias toward majority classes:
 
@@ -117,7 +126,7 @@ To mitigate bias toward majority classes:
 * Applied **learning rate scheduler**
 * Continued training for 15 epochs
 
-### 🔥 Final Model Performance
+###  Final Model Performance
 
 | Metric             | Value      |
 | ------------------ | ---------- |
@@ -147,14 +156,14 @@ To mitigate bias toward majority classes:
 
 ---
 
-## 📉 Error Analysis
+##  Error Analysis
 
 * Confusion matrix revealed minor confusion between visually similar fungal infections
 * Underperforming classes benefit most from additional data diversity
 
 ---
 
-## 🖥️ Deployment
+##  Deployment
 
 The trained model is deployed using **Streamlit**:
 
@@ -207,8 +216,6 @@ Grad-CAM showed:
 
 ➡️ Indicates correct localization but imperfect feature interpretation.
 
-> 🧠 *Explainability is not optional in medical AI — Grad-CAM bridges the gap between model performance and human trust.*
-
 ---
 
 ### Interpretability & Bias Analysis
@@ -221,7 +228,10 @@ Current observations suggest **low bias risk**, but broader Grad-CAM analysis is
 
 ---
 
-## 🛠️ Tech Stack
+> 🧠 *Explainability is not optional in medical AI — Grad-CAM bridges the gap between model performance and human trust.*
+
+
+##  Tech Stack
 
 * Python
 * PyTorch
@@ -231,7 +241,7 @@ Current observations suggest **low bias risk**, but broader Grad-CAM analysis is
 
 ---
 
-## 👤 Author
+##  Author
 
 **Abhay Singh**
 BCA (AI & ML + Data Science)
