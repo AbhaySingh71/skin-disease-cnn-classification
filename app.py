@@ -2,6 +2,7 @@ import streamlit as st
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+from torchvision.models import ResNet18_Weights
 import torchvision.models as models
 import cv2
 import numpy as np
@@ -31,7 +32,7 @@ CLASS_NAMES = [
 # ---------------- LOAD MODEL ----------------
 @st.cache_resource
 def load_model():
-    model = models.resnet18(pretrained=False)
+    model = models.resnet18(weights=None)
     model.fc = nn.Linear(model.fc.in_features, len(CLASS_NAMES))
     model.load_state_dict(
         torch.load(
@@ -62,7 +63,8 @@ class GradCAM:
         self.activations = None
 
         target_layer.register_forward_hook(self.forward_hook)
-        target_layer.register_backward_hook(self.backward_hook)
+        target_layer.register_full_backward_hook(self.backward_hook)
+
 
     def forward_hook(self, module, input, output):
         self.activations = output
